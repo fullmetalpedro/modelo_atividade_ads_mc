@@ -52,12 +52,16 @@ A senha é o único atributo que **não tem getter nenhum**. Não existe
 
 ```python
 def conferir_senha(self, senha):
-    # A senha nunca sai da classe: de fora só dá para perguntar se confere.
     return self._senha == senha
 ```
 
-O `LoginController` compara a senha sem nunca ter a senha na mão. É encapsulamento
-resolvendo um problema real de segurança, não só arrumação de código.
+O `LoginController` compara a senha sem nunca ter a senha na mão.
+
+Aqui no mock a senha ainda é texto puro e a comparação é `==`, então o
+encapsulamento sozinho não torna o sistema seguro. O ganho é outro: no dia em que
+entrar hash e comparação de tempo constante, muda só o corpo de `conferir_senha()`.
+Nenhum controller e nenhuma rota precisa saber que a regra mudou. É encapsulamento
+deixando a porta aberta para a correção, e não só arrumação de código.
 
 ### Encapsulamento também nos controllers
 
@@ -94,15 +98,15 @@ class Usuario:
 
 class Visitante(Usuario):
     def pode_ver_ofertas(self):
-        return True          # só isso muda
+        return True
 
 class Contribuidor(Visitante):
     def pode_publicar_oferta(self):
-        return True          # só isso muda
+        return True
 
 class Moderador(Contribuidor):
     def pode_moderar_ofertas(self):
-        return True          # só isso muda
+        return True
 ```
 
 **A base é a mais restrita de propósito.** Se amanhã alguém criar um perfil novo e

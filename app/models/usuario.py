@@ -2,12 +2,6 @@ from app.data.usuarios_mock import USUARIOS
 
 
 class Usuario:
-    """Classe base: o que todo usuário do KiOferta tem.
-
-    Guarda os dados encapsulados e, por padrão, não libera nada.
-    Quem libera cada permissão são as classes filhas.
-    """
-
     def __init__(self, id, nome, senha):
         self._id = id
         self.alterar_nome(nome)
@@ -33,15 +27,10 @@ class Usuario:
         return self._nome.lower() == nome.strip().lower()
 
     def conferir_senha(self, senha):
-        # A senha nunca sai da classe: de fora só dá para perguntar se confere.
         return self._senha == senha
 
-    # --- permissões ---
-    # A base é a mais restrita: não pode nada.
-    # Cada filha sobrescreve só o que ela ganha a mais.
-
     def mostrar_perfil(self):
-        return 'usuario'
+        raise NotImplementedError('cada perfil define o seu proprio nome')
 
     def pode_ver_ofertas(self):
         return False
@@ -53,8 +42,6 @@ class Usuario:
         return False
 
     def listar_permissoes(self):
-        # Escrito uma vez aqui e herdado por todos.
-        # Não pergunta o perfil: pergunta o que o objeto pode fazer.
         permissoes = []
         if self.pode_ver_ofertas():
             permissoes.append('ver_ofertas')
@@ -69,8 +56,6 @@ class Usuario:
 
 
 class Visitante(Usuario):
-    """Só olha: vê as ofertas que os outros publicaram."""
-
     def mostrar_perfil(self):
         return 'visitante'
 
@@ -79,8 +64,6 @@ class Visitante(Usuario):
 
 
 class Contribuidor(Visitante):
-    """Herda tudo do visitante e ganha o direito de publicar oferta."""
-
     def mostrar_perfil(self):
         return 'contribuidor'
 
@@ -89,8 +72,6 @@ class Contribuidor(Visitante):
 
 
 class Moderador(Contribuidor):
-    """Herda tudo do contribuidor e ainda modera as ofertas dos outros."""
-
     def mostrar_perfil(self):
         return 'moderador'
 
@@ -98,7 +79,6 @@ class Moderador(Contribuidor):
         return True
 
 
-# Em Python a própria classe é um objeto: dá para guardar num dicionário.
 PERFIS = {
     'visitante': Visitante,
     'contribuidor': Contribuidor,
@@ -107,6 +87,5 @@ PERFIS = {
 
 
 def carregar_usuarios():
-    # Único lugar que olha o texto do perfil: a hora de criar o objeto.
     return [PERFIS[u['perfil']](u['id'], u['nome'], u['senha'])
             for u in USUARIOS]
